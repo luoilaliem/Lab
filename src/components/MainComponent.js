@@ -3,7 +3,8 @@ import { Navbar, NavbarBrand } from "reactstrap";
 import Menu from "./MenuComponent";
 import DishDetail from "./DishdetailComponent";
 import { DISHES } from "../shared/dishes";
-
+import Header from "./HeaderComponent";
+import Footer from "./FooterComponent";
 class Main extends Component {
   constructor(props) {
     super(props);
@@ -23,15 +24,12 @@ class Main extends Component {
     );
     return (
       <div>
-        <Navbar dark color="primary">
-          <div className="container">
-            <NavbarBrand href="/">Funix</NavbarBrand>
-          </div>
-        </Navbar>
+        <Header/>
         <Menu
           dishes={this.state.dishes}
           onClick={(dishId) => this.onDishSelect(dishId)}
         />
+        
         <DishDetail
           dish={
             this.state.dishes.filter(
@@ -39,6 +37,7 @@ class Main extends Component {
             )[0]
           }
         />
+        <Footer/>
       </div>
     );
   }
