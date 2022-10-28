@@ -1,11 +1,12 @@
 import React from "react";
 import { Card, CardImg, CardText, CardBody, CardTitle, Breadcrumb, BreadcrumbItem } from "reactstrap";
 import { Link } from "react-router-dom";
+import { baseUrl } from '../shared/baseUrl';
 function RenderDish({ dish }) {
   return (
     <div className="col-12 col-md-5 m-1">
       <Card>
-        <CardImg width="100%" src={dish.image} value={dish.name}></CardImg>
+      <CardImg top src={baseUrl + dish.image} alt={dish.name} />
         <CardBody>
           <CardTitle>{dish.name}</CardTitle>
           <CardText>{dish.description}</CardText>

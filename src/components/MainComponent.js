@@ -1,26 +1,38 @@
 import React, { Component } from "react";
 import Contact from "./ContactComponent";
 import Menu from "./MenuComponent";
-import { COMMENTS } from '../shared/comments';
-import { PROMOTIONS } from '../shared/promotions';
-import { LEADERS } from '../shared/leaders';
-import { DISHES } from "../shared/dishes";
 import Header from "./HeaderComponent";
 import Footer from "./FooterComponent";
-import { BrowserRouter, Route, Switch, Redirect } from "react-router-dom";
+import {  Route, withRouter, Switch, Redirect } from "react-router-dom";
 import Home from "./HomeComponent";
 import DishDetail from "./DishdetailComponent";
-class Main extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      dishes: DISHES,
-      comments: COMMENTS,
-      promotions: PROMOTIONS,
-      leaders: LEADERS
-    };
-  }
+import { actions } from "react-redux-form";
+import { addComment, fetchDishes, fetchComments, fetchPromos } from "../redux/ActionCreators";
+import { connect } from "react-redux";
 
+const mapStateToProps = (state) => {
+  return {
+    dishes: state.dishes,
+    comments: state.comments,
+    leaders: state.leaders,
+    promotions: state.promotions
+  }
+}
+
+const mapDispatchToProps = dispatch => ({
+  addComment: (dishId, rating, author, comment) => dispatch(addComment(dishId, rating, author, comment)),
+  fetchDishes: () => { dispatch(fetchDishes())},
+  resetFeedbackForm: () => { dispatch(actions.reset('feedback'))},
+  fetchComments: () => dispatch(fetchComments()),
+  fetchPromos: () => dispatch(fetchPromos())
+});
+class Main extends Component {
+  
+  componentDidMount() {
+    this.props.fetchDishes();
+    this.props.fetchComments();
+    this.props.fetchPromos();
+  }
   onDishSelect(dishId) {
     this.setState({ selectedDish: dishId });
   }
@@ -28,17 +40,26 @@ class Main extends Component {
   render() {
     const DishWithId = ({ match }) => {
       return (
-        <DishDetail dish={this.state.dishes.filter((dish) => dish.id === parseInt(match.params.dishId, 10))[0]}
-          comments={this.state.comments.filter((comment) => comment.dishId === parseInt(match.params.dishId, 10))} />
+        <DishDetail dish={this.props.dishes.dishes.filter((dish) => dish.id === parseInt(match.params.dishId,10))[0]}
+            isLoading={this.props.dishes.isLoading}
+            errMess={this.props.dishes.errMess}
+            comments={this.props.comments.comments.filter((comment) => comment.dishId === parseInt(match.params.dishId,10))}
+            commentsErrMess={this.props.comments.errMess}
+            addComment={this.props.addComment}
+          />
       );
     };
     const HomePage = () => {
       return (
-        <Home
-          dish={this.state.dishes.filter((dish) => dish.featured)[0]}
-          promotion={this.state.promotions.filter((promo) => promo.featured)[0]}
-          leader={this.state.leaders.filter((leader) => leader.featured)[0]}
-        />
+        <Home 
+              dish={this.props.dishes.dishes.filter((dish) => dish.featured)[0]}
+              dishesLoading={this.props.dishes.isLoading}
+              dishesErrMess={this.props.dishes.errMess}
+              promotion={this.props.promotions.promotions.filter((promo) => promo.featured)[0]}
+              promoLoading={this.props.promotions.isLoading}
+              promoErrMess={this.props.promotions.errMess}
+              leader={this.props.leaders.filter((leader) => leader.featured)[0]}
+          />
       );
     }
 
@@ -48,8 +69,8 @@ class Main extends Component {
         <Switch>
           <Route path='/menu/:dishId' component={DishWithId} />
           <Route path='/home' component={HomePage} />
-          <Route exact path='/menu' component={() => <Menu dishes={this.state.dishes} />} />
-          <Route exact path='/contactus' component={Contact} />
+          <Route exact path='/menu' component={() => <Menu dishes={this.props.dishes} />} />
+          <Route exact path='/contactus' component={() => <Contact resetFeedbackForm={this.props.resetFeedbackForm } />} />
           <Redirect to="/home" />
         </Switch>
 
@@ -59,4 +80,4 @@ class Main extends Component {
   }
 }
 
-export default Main;
+export default withRouter(connect(mapStateToProps, mapDispatchToProps)(Main))
